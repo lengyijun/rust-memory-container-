@@ -1,0 +1,136 @@
+// Note:
+//  - .dot version is not the original source.
+//  - .dot version is so experimentally.
+//    - The original author don't know, help wanted:
+//      - How to position the bottom note(daggers)?
+//      - How to position the title to the left-bottom?
+//      - How to position the label of an edge?
+//      - Is it possible without hard complex magic number-ed source codes?
+//        - Thus, this is so experimentally added with very basic source code for now.
+digraph _
+{
+ label="Rust\lMemory Container Ceat-sheet\lrev.1; 2020-08-22\lhttps://github.com/usagi/rust-memory-container-cs"
+ fontcolor="#808080"
+
+ graph
+ [
+  rankdir="LR"
+  bgcolor="#0D0D0D"
+ ]
+
+ node
+ [
+  fontnames=""
+  shape="box"
+  color="#808080"
+  fontcolor="#808080"
+ ]
+
+ edge
+ [
+  fontcolor="#808080"
+  color="#808080"
+  shape=line
+ ]
+
+ // Notes
+
+ //{
+  //rank=sink // <- not work in vscode preview with the "Graphviz (dot) language support for Visual Studio Code"
+
+  daggar_a
+  [
+   label="`(†a): mut T` is not a type, this suggenstion mean use `mut` declare keyword such like `let mut x: T`."
+   shape=plaintext
+  ]
+ //}
+
+ // Labels, the right columns
+
+ t              [label="T" width=1]
+ ref_t          [label="&T ≈ *const T" width=1]
+ mut_t          [label=<Xmut T<SUP>(†a)</SUP>>]
+ ref_mut_t      [label="&mut t ≈ *mut T"]
+ box_t          [label="Box<T>"]
+ cell_t         [label="Cell<T>"]
+ ref_cell_t     [label="RefCell<T>"]
+ atomic_t       [label="AtomicT"]
+ mutex_t        [label="Mutex<T>"]
+ r_w_lock_t     [label="RwLock<T>"]
+ rc_t           [label="Rc<T>"]
+ rc_cell_t      [label="Rc<Cell<T>>"]
+ rc_ref_cell_t  [label="Rc<RefCell<T>>"]
+ arc_t          [label="Arc<T>"]
+ arc_atomic_t   [label="Arc<Atomic<T>>"]
+ arc_mutex_t    [label="Arc<Mutex<T>>"]
+ arc_r_w_lock_t [label="Arc<RwLock<T>>"]
+
+ { rank=same
+   t ref_t mut_t ref_mut_t
+   box_t cell_t ref_cell_t
+   atomic_t mutex_t r_w_lock_t
+   rc_t rc_cell_t rc_ref_cell_t
+   arc_t arc_atomic_t arc_mutex_t arc_r_w_lock_t
+ }
+
+ // Labels, the option boxes
+
+ ownership           [label="Ownership"]
+ allocate            [label="Allocate"]
+ threads_0           [label="Threads"]
+ threads_1           [label="Threads"]
+ r_w_0               [label="R/W"]
+ r_w_1               [label="R/W"]
+ mutable_0           [label="Mutable"]
+ mutable_1           [label="Mutable"]
+ mutable_2           [label="Mutable"]
+ interior_mutability [label="Interior-mutability"]
+ reference_0         [label="Reference"]
+ reference_1         [label="Reference"]
+ reference_2         [label="Reference"]
+ reference_3         [label="Copy trait"]
+ type_0              [label="Type"]
+ type_1              [label="Type"]
+
+ // Edges
+
+ ownership -> allocate      [label="<unique>"]
+  allocate -> mutable_0     [label="<stack>"]
+   mutable_0 -> reference_0 [label="<const>"]
+    reference_0 -> t        [label="<val>"]
+    reference_0 -> ref_t    [label="<ref>"]
+
+   mutable_0 -> reference_1  [label="<mut>"]
+    reference_1 -> mut_t     [label="<val>"]
+    reference_1 -> ref_mut_t [label="<ref>"]
+
+  allocate -> threads_0                [label="<heap>"]
+   threads_0 -> interior_mutability    [label="<single>"]
+    interior_mutability -> box_t       [label="<not need>"]
+    interior_mutability -> reference_2 [label="<need>"]
+     reference_2 -> cell_t             [label="<val>"]
+     reference_2 -> ref_cell_t         [label="<ref>"]
+
+   threads_0 -> r_w_0   [label="<mutiple>"]
+    r_w_0 -> type_0     [label="<reader/writer>"]
+     type_0 -> atomic_t [label="<num|bool>"]
+     type_0 -> mutex_t  [label="<any>"]
+
+    r_w_0 -> r_w_lock_t
+
+  ownership -> threads_1          [label="<shared>"]
+   threads_1 -> mutable_1         [label="<single>"]
+    mutable_1 -> rc_t             [label="<const>"]
+    mutable_1 -> reference_3      [label="<mut>"]
+     reference_3 -> rc_cell_t     [label="<impl>"]
+     reference_3 -> rc_ref_cell_t [label="<any>"]
+
+   threads_1 -> mutable_2    [label="<multiple>"]
+    mutable_2 -> arc_t       [label="<const>"]
+    mutable_2 -> r_w_1       [label="<mut>"]
+     r_w_1 -> type_1         [label="<reader/writer>"]
+      type_1 -> arc_atomic_t [label="<num|bool>"]
+      type_1 -> arc_mutex_t  [label="<any>"]
+     r_w_1 -> arc_r_w_lock_t [label="<readers/writer>"]
+
+}
