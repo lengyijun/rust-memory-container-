@@ -65,15 +65,21 @@ digraph _
  arc_mutex_t    [label="Arc<Mutex<T>>"]
  arc_r_w_lock_t [label="Arc<RwLock<T>>"]
 
+ arc_box_t    [label="Arc<Box<T>>"]
+
  { rank=same
    t ref_t mut_t ref_mut_t
    box_t cell_t ref_cell_t
    atomic_t mutex_t r_w_lock_t
    rc_t rc_cell_t rc_ref_cell_t
    arc_t arc_atomic_t arc_mutex_t arc_r_w_lock_t
+   arc_box_t
  }
 
  // Labels, the option boxes
+
+ allocate_arc_1      [label="allocate"]
+ allocate_arc_2      [label="allocate"]
 
  ownership           [label="Ownership"]
  allocate            [label="Allocate"]
@@ -126,7 +132,9 @@ digraph _
      reference_3 -> rc_ref_cell_t [label="<any>"]
 
    threads_1 -> mutable_2    [label="<multiple>"]
-    mutable_2 -> arc_t       [label="<const>"]
+    mutable_2 -> allocate_arc_1 [label="<const>"]
+    allocate_arc_1 ->arc_t [label="stack"]
+    allocate_arc_1 ->arc_box_t [label="heap"]
     mutable_2 -> r_w_1       [label="<mut>"]
      r_w_1 -> type_1         [label="<reader/writer>"]
       type_1 -> arc_atomic_t [label="<num|bool>"]
